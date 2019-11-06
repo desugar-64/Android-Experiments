@@ -2,55 +2,95 @@ package com.sergeyfitis.androidexperiments.raycasting
 
 import android.graphics.*
 import android.graphics.drawable.Drawable
+import androidx.core.graphics.ColorUtils
 import com.sergeyfitis.androidexperiments.common.Float2
 import com.sergeyfitis.androidexperiments.common.dp
-import com.sergeyfitis.androidexperiments.common.draw
-import com.sergeyfitis.androidexperiments.common.fillPaint
+import com.sergeyfitis.androidexperiments.common.strokePaint
 import com.sergeyfitis.androidexperiments.raycasting.rays.Boundary
+import com.sergeyfitis.androidexperiments.raycasting.rays.Light
 import com.sergeyfitis.androidexperiments.raycasting.rays.Ray
+import kotlin.random.Random
 
 class RaycastingDrawable : Drawable() {
 
-    private var wall = Boundary(
-        a = Float2(200.dp, 100.dp),
-        b = Float2(280.dp, 400.dp)
+    private val rnd: Random
+        get() = Random(System.nanoTime())
+
+    private var walls = listOf(
+        Boundary(
+            a = Float2(
+                x = rnd.nextInt(360.dp.toInt()).toFloat(),
+                y = rnd.nextInt(360.dp.toInt()).toFloat()
+            ),
+            b = Float2(
+                x = rnd.nextInt(600.dp.toInt()).toFloat(),
+                y = rnd.nextInt(600.dp.toInt()).toFloat()
+            )
+        ),
+        Boundary(
+            a = Float2(
+                x = rnd.nextInt(360.dp.toInt()).toFloat(),
+                y = rnd.nextInt(360.dp.toInt()).toFloat()
+            ),
+            b = Float2(
+                x = rnd.nextInt(600.dp.toInt()).toFloat(),
+                y = rnd.nextInt(600.dp.toInt()).toFloat()
+            )
+        ),
+        Boundary(
+            a = Float2(
+                x = rnd.nextInt(360.dp.toInt()).toFloat(),
+                y = rnd.nextInt(360.dp.toInt()).toFloat()
+            ),
+            b = Float2(
+                x = rnd.nextInt(600.dp.toInt()).toFloat(),
+                y = rnd.nextInt(600.dp.toInt()).toFloat()
+            )
+        ),
+        Boundary(
+            a = Float2(
+                x = rnd.nextInt(360.dp.toInt()).toFloat(),
+                y = rnd.nextInt(360.dp.toInt()).toFloat()
+            ),
+            b = Float2(
+                x = rnd.nextInt(600.dp.toInt()).toFloat(),
+                y = rnd.nextInt(600.dp.toInt()).toFloat()
+            )
+        )
     )
 
-    private val wallPaint: Paint = fillPaint(color = Color.WHITE)
+    private val wallPaint: Paint = strokePaint(color = Color.WHITE)
 
-    private val ray = Ray(
-        origin = Float2(50.dp, 50.dp),
-        direction = Float2(100.dp, 100.dp)
-    )
+    private val rayPaint: Paint = strokePaint(color = ColorUtils.setAlphaComponent(Color.GREEN, 50), width = 3.dp)
 
-    private val rayPaint: Paint = fillPaint(color = Color.GREEN)
-
-    private var castPoint: Float2? = null
-    private val castPaint: Paint = fillPaint(color = Color.RED)
-    private val castPointRadius: Float = 5.dp
+    private val light = Light(position = Float2(100.dp, 100.dp)).apply {
+        for (i in 0..360 step 1) {
+            val rad: Double = Math.toRadians(i.toDouble())
+            rays.add(
+                Ray(origin = position, direction = Float2.fromAngle(rad))
+            )
+        }
+    }
 
     override fun setHotspot(x: Float, y: Float) {
         super.setHotspot(x, y)
-        ray.lookAt(x, y)
-        castPoint = ray.cast(wall)
+        light.position.x = x
+        light.position.y = y
         invalidateSelf()
-    }
-
-    override fun onBoundsChange(bounds: Rect?) {
-        super.onBoundsChange(bounds)
     }
 
     override fun draw(canvas: Canvas) = with(canvas) {
         drawColor(Color.BLACK)
-        wall.draw(this, wallPaint)
-        ray.draw(canvas, rayPaint)
-        castPoint?.draw(canvas, castPaint, castPointRadius)
+        walls.forEach { wall -> wall.draw(this, wallPaint) }
+        light.look(walls, this, rayPaint)
+        light.draw(this, rayPaint)
+
 
         Unit
     }
 
     override fun setAlpha(alpha: Int) {
-       // TODO
+        // TODO
     }
 
     override fun getOpacity() = PixelFormat.OPAQUE

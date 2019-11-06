@@ -4,6 +4,8 @@ package com.sergeyfitis.androidexperiments.common
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
@@ -65,6 +67,13 @@ data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
         x *= l
         y *= l
     }
+
+    companion object {
+        fun fromAngle(radians: Double) = Float2(
+            x = cos(radians).toFloat(),
+            y = sin(radians).toFloat()
+        )
+    }
 }
 
 inline fun length(v: Float2) = sqrt(v.x * v.x + v.y * v.y)
@@ -72,3 +81,6 @@ inline fun length(v: Float2) = sqrt(v.x * v.x + v.y * v.y)
 inline fun Float2.draw(canvas: Canvas, paint: Paint, radius: Float) = with(canvas) {
     drawCircle(x, y, radius, paint)
 }
+
+inline fun distance(a: Float2, b: Float2) = length(a - b)
+inline fun min(a: Float2, b: Float2) = Float2(Math.min(a.x, b.x), Math.min(a.y, b.y))

@@ -18,7 +18,6 @@ data class Ray(
     fun lookAt(x: Float, y: Float) {
         direction.x = x - origin.x
         direction.y = y - origin.y
-//        direction.normalize()
     }
 
     fun cast(boundary: Boundary): Float2? {
